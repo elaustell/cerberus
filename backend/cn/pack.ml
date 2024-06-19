@@ -50,7 +50,7 @@ let packing_ft loc global provable ret =
       | Owned (Struct tag, init) ->
           let layout = SymMap.find tag global.Global.struct_decls in
           let lrt, value =
-            List.fold_right (fun {offset; size; member_or_padding} (lrt, value) ->
+            List.fold_right ~f:(fun {offset; size; member_or_padding} (lrt, value) ->
               match member_or_padding with
               | Some (member, mct) ->
                 let request =
@@ -75,7 +75,7 @@ let packing_ft loc global provable ret =
                 let padding_s, padding = IT.fresh_named (Memory.bt_of_sct padding_ct) "padding" loc in
                 (LRT.Resource ((padding_s, (request, IT.bt padding)), (loc, None), lrt),
                 value)
-              ) layout (LRT.I, [])
+              ) layout ~init:(LRT.I, [])
           in
           let at = LAT.of_lrt lrt (LAT.I (struct_ (tag, value) loc)) in
           Some at
@@ -99,7 +99,7 @@ let unpack_owned loc global (ct, init) pointer (O o) =
   | Struct tag ->
     let layout = SymMap.find tag global.Global.struct_decls in
     let res =
-      List.fold_right (fun {offset; size; member_or_padding} res ->
+      List.fold_right ~f:(fun {offset; size; member_or_padding} res ->
         match member_or_padding with
         | Some (member, mct) ->
           let mresource =
@@ -121,7 +121,7 @@ let unpack_owned loc global (ct, init) pointer (O o) =
             }, O (default_ (Memory.bt_of_sct padding_ct) loc))
           in
           (mresource :: res)
-        ) layout []
+        ) layout ~init:[]
     in
     Some res
 
@@ -163,7 +163,7 @@ let extractable_one (* global *) prove_or_model (predicate_name, index) (ret, O 
             (P { name = ret.name;
                 pointer = pointer_offset_ (ret.pointer,
                     mul_ (cast_ Memory.uintptr_bt ret.step loc, cast_ Memory.uintptr_bt index loc) loc) loc;
-                iargs = List.map (IT.subst su) ret.iargs; },
+                iargs = List.map ~f:(IT.subst su) ret.iargs; },
             O  (map_get_ o index loc))
           in
           let ret_reduced =

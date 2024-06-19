@@ -1,3 +1,6 @@
+module List = List_old
+let foo = ()
+
 let rec group_toplevel_defs new_list = function
   | [] -> new_list
   | (loc, strs) :: xs ->

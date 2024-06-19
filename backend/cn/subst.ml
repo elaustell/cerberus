@@ -19,9 +19,9 @@ let pp ppf subst =
 
 let make free_vars replace =
   let relevant =
-    List.fold_right (fun (s, r) acc ->
+    List.fold_right ~f:(fun (s, r) acc ->
         SymSet.union (free_vars r) (SymSet.add s acc)
-      ) replace SymSet.empty
+      ) replace ~init:SymSet.empty
   in
   { replace; relevant; flags = SymSet.empty }
 

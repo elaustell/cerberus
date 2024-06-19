@@ -16,8 +16,8 @@ type 'i t =
 let mComputational (name, bound, info) t =
   Computational ((name, bound), info, t)
 
-let mComputationals t =
-  List.fold_right mComputational t
+let mComputationals comps over =
+  List.fold_right ~f:mComputational comps ~init:over
 
 
 let rec subst i_subst (substitution: _ Subst.t) at =

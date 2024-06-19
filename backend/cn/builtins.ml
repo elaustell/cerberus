@@ -144,12 +144,12 @@ let max_min_bits =
   let sizes = [8; 16; 32; 64] in
   let signs = [BT.Unsigned; Signed] in
   List.fold_left
-    (fun acc sign ->
+    ~f:(fun acc sign ->
       List.fold_left
-        (fun acc size -> max_bits_def (sign, size) :: min_bits_def (sign, size) :: acc)
-        acc
+        ~f:(fun acc size -> max_bits_def (sign, size) :: min_bits_def (sign, size) :: acc)
+        ~init:acc
         sizes)
-    []
+    ~init:[]
     signs
 
 
@@ -189,11 +189,11 @@ let builtin_funs = max_min_bits @ [
 ]
 
 let apply_builtin_funs fsym args loc =
-  match List.find_opt (fun (_, fsym', _) -> Sym.equal fsym fsym') builtin_funs with
+  match List.find ~f:(fun (_, fsym', _) -> Sym.equal fsym fsym') builtin_funs with
   | None -> return None
   | Some (_, _, mk) ->
     let@ t = mk args loc in
     return (Some t)
 
 let cn_builtin_fun_names =
-  List.map (fun (str,sym,_) -> (str, sym)) builtin_funs
+  List.map ~f:(fun (str,sym,_) -> (str, sym)) builtin_funs
